@@ -1,0 +1,59 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "ZipLyne Lens",
+  "version": "0.6.24",
+  "identifier": "com.ziplyne.lens",
+  "build": {
+    "beforeDevCommand": "pnpm --dir ../.. desktop:serve",
+    "beforeBuildCommand": "pnpm --dir ../.. desktop:prepare",
+    "devUrl": "http://127.0.0.1:5173",
+    "frontendDist": "../../web/dist"
+  },
+  "app": {
+    "security": {
+      "csp": {
+        "default-src": "'self'",
+        "connect-src": "'self' ipc: http://ipc.localhost http://127.0.0.1:*",
+        "img-src": "'self' data:",
+        "style-src": "'self' 'unsafe-inline'",
+        "object-src": "'none'",
+        "base-uri": "'none'",
+        "frame-ancestors": "'none'"
+      }
+    },
+    "windows": [
+      {
+        "label": "main",
+        "title": "ZipLyne Lens",
+        "width": 1280,
+        "height": 820,
+        "minWidth": 1040,
+        "minHeight": 700,
+        "center": true,
+        "visible": true
+      }
+    ]
+  },
+  "bundle": {
+    "active": true,
+    "createUpdaterArtifacts": true,
+    "category": "DeveloperTool",
+    "copyright": "Copyright 2026 ZipLyne",
+    "shortDescription": "Local AI coding spend and prompt intelligence.",
+    "longDescription": "ZipLyne Lens is a local-first dashboard for AI coding spend, prompt intelligence, client attribution, and project-level usage analysis.",
+    "externalBin": ["binaries/ziplyne-lens-api"],
+    "targets": ["app", "dmg"],
+    "macOS": {
+      "minimumSystemVersion": "11.0",
+      "entitlements": "entitlements.plist"
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDI5RTFDRUE1QkY4MTJENTcKUldSWExZRy9wYzdoS1pQdG13bExqTHJzbllqdXlCYys2OHFBVVJyamxOSGpNb0RJNUkrVmpPZVYK",
+      "endpoints": [
+        "https://github.com/ZipLyne-Agency/ZipLyne-Lens/releases/latest/download/latest.json"
+      ]
+    }
+  }
+}

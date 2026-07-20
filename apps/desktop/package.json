@@ -1,0 +1,18 @@
+{
+  "name": "@ziplyne/desktop",
+  "version": "0.1.0",
+  "description": "Tauri desktop shell for ZipLyne Lens.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "tauri build",
+    "dev": "tauri dev",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.1"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.11.4"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "ZipLyne Lens Config",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "clientRules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["clientId", "clientName", "match"],
+        "properties": {
+          "clientId": { "type": "string", "minLength": 1 },
+          "clientName": { "type": "string", "minLength": 1 },
+          "match": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "overrides": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "hidden": { "type": "boolean" }
+        }
+      }
+    },
+    "autoMatch": { "type": "boolean" },
+    "accounts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "email", "command", "service"],
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "email": { "type": "string" },
+          "command": { "type": "string" },
+          "service": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  }
+}

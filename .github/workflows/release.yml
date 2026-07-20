@@ -1,0 +1,216 @@
+name: Release
+
+# Every code push to main ships a fresh signed + notarized macOS build and marks
+# it as the latest release, so the README "Download for macOS" button always
+# hands people the newest version. The next patch version is derived from the
+# greater of the checked-in version floor and GitHub's latest published release.
+# This stays monotonic even if repository history is replaced or squashed.
+#
+# Doc-only pushes are skipped (paths-ignore) so a README tweak doesn't spend ~5
+# minutes of macOS runner time on a signed build. Cut a build by hand anytime
+# from the Actions tab (workflow_dispatch).
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**/*.md"
+      - "docs/**"
+      - "LICENSE"
+      - ".github/ISSUE_TEMPLATE/**"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Rapid pushes coalesce to the newest commit: an in-flight build is cancelled so
+# "latest" always tracks the tip of main.
+concurrency:
+  group: release
+  cancel-in-progress: true
+
+jobs:
+  macos:
+    name: Build, sign, notarize (Apple Silicon)
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+
+      - name: Compute version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          FLOOR="$(node -p "require('./apps/desktop/src-tauri/tauri.conf.json').version")"
+          # Fail closed if GitHub cannot report the current release. Guessing from
+          # the checked-in floor could reuse a tag after the first new release.
+          LATEST_TAG="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)"
+          LATEST="${LATEST_TAG#v}"
+          # Node reads these values from process.env; shell expansion is intentionally disabled.
+          # shellcheck disable=SC2016
+          VERSION="$(FLOOR="$FLOOR" LATEST="$LATEST" node -e '
+            const parse = (value) => /^\d+\.\d+\.\d+$/.test(value || "")
+              ? value.split(".").map(Number)
+              : null;
+            const floor = parse(process.env.FLOOR);
+            if (!floor) throw new Error(`Invalid version floor: ${process.env.FLOOR}`);
+            const latest = parse(process.env.LATEST);
+            const compare = (a, b) => a[0] - b[0] || a[1] - b[1] || a[2] - b[2];
+            const base = latest && compare(latest, floor) > 0 ? latest : floor;
+            process.stdout.write(`${base[0]}.${base[1]}.${base[2] + 1}`);
+          ')"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Version floor: ${FLOOR}; latest release: ${LATEST:-none}; next: ${VERSION}"
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 22
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2
+        with:
+          bun-version: 1.3.13
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4 # stable
+
+      # Stamp the computed version into the app config for this build only (not
+      # committed) so the bundle and release tag agree.
+      - name: Stamp version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          node -e "const f='apps/desktop/src-tauri/tauri.conf.json';const fs=require('fs');const o=JSON.parse(fs.readFileSync(f));o.version=process.env.VERSION;fs.writeFileSync(f,JSON.stringify(o,null,2)+'\n')"
+          node -e "const f='package.json';const fs=require('fs');const o=JSON.parse(fs.readFileSync(f));o.version=process.env.VERSION;fs.writeFileSync(f,JSON.stringify(o,null,2)+'\n')"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Write the App Store Connect API key to a file for Tauri's notarizer.
+      # Passed via env (not inline) so PEM newlines survive intact.
+      - name: Stage notarization key
+        env:
+          ASC_API_KEY_P8: ${{ secrets.ASC_API_KEY_P8 }}
+        run: printf '%s\n' "$ASC_API_KEY_P8" > "$RUNNER_TEMP/asc_api_key.p8"
+
+      # tauri build runs beforeBuildCommand (pnpm build + desktop:sidecar) then
+      # bundles the .app and .dmg. With these env vars set it imports the cert into
+      # a temporary keychain, signs the app and the Bun sidecar with the hardened
+      # runtime, and notarizes + staples via the App Store Connect API key.
+      - name: Build, sign, and notarize
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE_P12 }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+          APPLE_API_KEY: ${{ secrets.ASC_KEY_ID }}
+          APPLE_API_KEY_PATH: ${{ runner.temp }}/asc_api_key.p8
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+        run: pnpm desktop:build
+
+      - name: Verify signed and notarized app
+        run: |
+          APP="$(find apps/desktop/src-tauri/target/release/bundle/macos -maxdepth 1 -name '*.app' -print -quit)"
+          test -d "$APP"
+          codesign --verify --deep --strict --verbose=2 "$APP"
+          spctl --assess --type execute -vv "$APP"
+          xcrun stapler validate "$APP"
+
+      # Tauri notarizes and staples the .app but not the .dmg wrapper. Staple the
+      # dmg too so double-clicking the downloaded installer never needs a network
+      # round-trip to Apple — a zero-friction first open for non-technical users.
+      - name: Notarize and staple the DMG
+        env:
+          APPLE_API_KEY_PATH: ${{ runner.temp }}/asc_api_key.p8
+          APPLE_API_KEY: ${{ secrets.ASC_KEY_ID }}
+          APPLE_API_ISSUER: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          BUNDLE_DIR="apps/desktop/src-tauri/target/release/bundle"
+          DMG="$(find "$BUNDLE_DIR/dmg" -name '*.dmg' | head -1)"
+          if [ -z "$DMG" ]; then echo "No .dmg produced" >&2; exit 1; fi
+          xcrun notarytool submit "$DMG" \
+            --key "$APPLE_API_KEY_PATH" --key-id "$APPLE_API_KEY" --issuer "$APPLE_API_ISSUER" \
+            --wait --timeout 20m
+          xcrun stapler staple "$DMG"
+          xcrun stapler validate "$DMG"
+
+      - name: Collect installer
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          BUNDLE_DIR="apps/desktop/src-tauri/target/release/bundle"
+          mkdir -p dist-release
+          DMG="$(find "$BUNDLE_DIR/dmg" -name '*.dmg' | head -1)"
+          if [ -z "$DMG" ]; then echo "No .dmg produced" >&2; exit 1; fi
+          UPDATER="$(find "$BUNDLE_DIR/macos" -name '*.app.tar.gz' | head -1)"
+          if [ -z "$UPDATER" ] || [ ! -f "${UPDATER}.sig" ]; then
+            echo "No signed updater bundle produced" >&2
+            exit 1
+          fi
+          # Stable asset name so releases/latest/download/ZipLyne-Lens.dmg always
+          # resolves to the newest build (the release tag carries the version).
+          cp "$DMG" "dist-release/ZipLyne-Lens.dmg"
+          cp "$UPDATER" "dist-release/ZipLyne-Lens.app.tar.gz"
+          cp "${UPDATER}.sig" "dist-release/ZipLyne-Lens.app.tar.gz.sig"
+          UPDATER_SIGNATURE="$(cat "${UPDATER}.sig")"
+          export UPDATER_SIGNATURE
+          # Node reads these values from process.env; shell expansion is intentionally disabled.
+          # shellcheck disable=SC2016
+          node -e '
+            const fs = require("fs");
+            const body = {
+              version: process.env.VERSION,
+              notes: `ZipLyne Lens ${process.env.VERSION}`,
+              pub_date: new Date().toISOString(),
+              platforms: {
+                "darwin-aarch64": {
+                  signature: process.env.UPDATER_SIGNATURE,
+                  url: "https://github.com/ZipLyne-Agency/ZipLyne-Lens/releases/latest/download/ZipLyne-Lens.app.tar.gz"
+                }
+              }
+            };
+            fs.writeFileSync("dist-release/latest.json", `${JSON.stringify(body, null, 2)}\n`);
+          '
+          ls -la dist-release
+
+      - name: Verify signature and notarization
+        run: |
+          codesign --verify --verbose=2 "dist-release/ZipLyne-Lens.dmg"
+          xcrun stapler validate "dist-release/ZipLyne-Lens.dmg"
+          spctl --assess --type install -vv "dist-release/ZipLyne-Lens.dmg"
+
+          brew list minisign >/dev/null 2>&1 || brew install minisign
+          DECODED_SIG="$(mktemp)"
+          trap 'rm -f "$DECODED_SIG"' EXIT
+          node - "dist-release/ZipLyne-Lens.app.tar.gz.sig" "$DECODED_SIG" <<'NODE'
+          const fs = require("node:fs");
+          const [source, destination] = process.argv.slice(2);
+          fs.writeFileSync(destination, Buffer.from(fs.readFileSync(source, "utf8").trim(), "base64"), { mode: 0o600 });
+          NODE
+          PUBKEY="$(node -e 'const c=require("./apps/desktop/src-tauri/tauri.conf.json");process.stdout.write(Buffer.from(c.plugins.updater.pubkey,"base64").toString().split(/\r?\n/)[1])')"
+          minisign -Vm "dist-release/ZipLyne-Lens.app.tar.gz" -x "$DECODED_SIG" -P "$PUBKEY"
+
+      - name: Publish release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          name: ZipLyne Lens v${{ steps.version.outputs.version }}
+          files: dist-release/*
+          fail_on_unmatched_files: true
+          make_latest: true
+          generate_release_notes: true
+          body: |
+            Signed and notarized by Apple. Local first: everything stays on your Mac.
+
+            In-app updates are signed separately and verified by ZipLyne Lens before installation.
+
+            **Install:** download `ZipLyne-Lens.dmg`, open it, and drag ZipLyne Lens
+            into Applications.

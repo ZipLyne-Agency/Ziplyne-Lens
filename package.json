@@ -1,0 +1,39 @@
+{
+  "name": "ziplyne-lens",
+  "version": "0.6.24",
+  "private": true,
+  "description": "Open-source local-first AI coding spend dashboard by ZipLyne.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ZipLyne-Agency/ZipLyne-Lens.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ZipLyne-Agency/ZipLyne-Lens/issues"
+  },
+  "homepage": "https://github.com/ZipLyne-Agency/ZipLyne-Lens#readme",
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@10.33.0",
+  "scripts": {
+    "build": "pnpm --filter @ziplyne/core build && pnpm --filter @ziplyne/api build && pnpm --filter @ziplyne/web build",
+    "check": "pnpm typecheck && pnpm test",
+    "desktop:build": "pnpm --filter @ziplyne/desktop build",
+    "desktop:dev": "pnpm --filter @ziplyne/desktop dev",
+    "desktop:prepare": "pnpm build && pnpm desktop:sidecar",
+    "desktop:serve": "pnpm --filter @ziplyne/core build && concurrently -n api,web -c blue,green \"PORT=8787 pnpm --filter @ziplyne/api dev\" \"PORT=5173 ZIPLYNE_API_URL=http://127.0.0.1:8787 pnpm --filter @ziplyne/web dev\"",
+    "desktop:sidecar": "mkdir -p apps/desktop/src-tauri/binaries && bun build apps/api/src/server.ts --compile --target bun-darwin-arm64 --outfile apps/desktop/src-tauri/binaries/ziplyne-lens-api-aarch64-apple-darwin",
+    "dev": "pnpm --filter @ziplyne/core build && concurrently -n api,web -c blue,green \"pnpm --filter @ziplyne/api dev\" \"pnpm --filter @ziplyne/web dev\"",
+    "format": "biome format --write .",
+    "lint": "biome check .",
+    "test": "pnpm --filter @ziplyne/core test && pnpm --filter @ziplyne/api test && pnpm --filter @ziplyne/web test",
+    "typecheck": "pnpm --filter @ziplyne/core typecheck && pnpm --filter @ziplyne/core build && pnpm --filter @ziplyne/api typecheck && pnpm --filter @ziplyne/web typecheck"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.2.0",
+    "concurrently": "^9.2.0",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4"
+  }
+}

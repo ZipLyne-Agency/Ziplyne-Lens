@@ -1,0 +1,25 @@
+{
+  "name": "@ziplyne/api",
+  "version": "0.1.0",
+  "description": "Local API server for ZipLyne Lens.",
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.6",
+    "@ziplyne/core": "workspace:*",
+    "hono": "^4.10.7",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsx": "^4.20.6",
+    "vitest": "^3.2.4"
+  }
+}

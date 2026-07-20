@@ -1,0 +1,23 @@
+{
+  "$schema": "./docs/config.schema.json",
+  "clientRules": [
+    {
+      "clientId": "acme",
+      "clientName": "Acme Capital",
+      "match": "acme-capital"
+    },
+    {
+      "clientId": "internal",
+      "clientName": "Internal Products",
+      "match": "ziplyne"
+    }
+  ],
+  "accounts": [
+    {
+      "label": "default",
+      "email": "you@example.com",
+      "command": "claude",
+      "service": "Claude Code-credentials"
+    }
+  ]
+}

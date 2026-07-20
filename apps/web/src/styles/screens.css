@@ -1,0 +1,1021 @@
+/* ============================================================
+   Screens — workspace grids and per-workspace specifics.
+   Every workspace is a fixed grid; only list regions scroll.
+   ============================================================ */
+
+/* ============================ NOW ============================ */
+
+/* Fixed frame: 150px top strip, optional one-line attention strip, and a
+   kanban that fills the rest. Only panel bodies scroll. */
+.now-grid {
+  grid-template-rows: 150px minmax(0, 1fr);
+}
+
+.now-grid.attention {
+  grid-template-rows: 150px auto minmax(0, 1fr);
+}
+
+.now-top {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  min-height: 0;
+  min-width: 0;
+}
+
+.header-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--t2);
+}
+
+.today-hero {
+  padding: var(--space-3) var(--space-3) var(--space-2);
+}
+
+.today-cost {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+}
+
+.today-sub {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--t2);
+}
+
+/* Agent spend list under the pinned hero; scrolls on its own. */
+.today-agents {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.agent-mini {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 30px;
+  padding: 3px var(--space-3);
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.agent-mini .name {
+  flex: 1;
+  color: var(--t2);
+  font-weight: 550;
+}
+
+.agent-mini .cost {
+  font-variant-numeric: tabular-nums;
+  color: var(--t1);
+  font-weight: 600;
+}
+
+/* Indented per-profile sub-row under a multi-account agent (Claude). */
+.agent-mini.sub {
+  min-height: 24px;
+  padding-left: 28px;
+  font-size: 11px;
+}
+
+.agent-mini.sub .name {
+  color: var(--t3);
+  font-weight: 500;
+}
+
+.agent-mini.sub .cost {
+  color: var(--t2);
+  font-weight: 550;
+}
+
+/* Quotas panel: one thin bar per Claude account */
+.quota-list {
+  padding: var(--space-2) 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quota-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.quota-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+  min-width: 0;
+}
+
+.quota-name {
+  flex: 1;
+  min-width: 0;
+  color: var(--t2);
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.quota-pct {
+  flex: none;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.quota-pct.ok {
+  color: var(--ok-ink);
+}
+
+.quota-pct.warn {
+  color: var(--warn-ink);
+}
+
+.quota-pct.bad {
+  color: var(--bad-ink);
+}
+
+.quota-pct.off {
+  color: var(--t3);
+  font-weight: 500;
+}
+
+.quota-week {
+  flex: none;
+  font-size: 11px;
+  color: var(--t3);
+}
+
+.quota-flag {
+  flex: none;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--warn-ink);
+}
+
+/* Connections panel */
+.conn-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding: var(--space-2) 10px 0;
+}
+
+.conn-list {
+  padding: 6px 10px var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.conn-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-height: 22px;
+  font-size: 12px;
+  min-width: 0;
+}
+
+.conn-title {
+  flex: none;
+  max-width: 45%;
+  font-weight: 550;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conn-target {
+  flex: 1;
+  min-width: 0;
+  font-size: 11px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.conn-elapsed {
+  flex: none;
+  font-size: 11px;
+  color: var(--t2);
+}
+
+/* One-line warn strip above the kanban; rendered only when count > 0. */
+.attention-strip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 0 var(--space-3);
+  border-radius: var(--r-row);
+  border: 1px solid color-mix(in srgb, var(--warn) 28%, transparent);
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+  font-size: 12px;
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.attention-strip span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Kanban: 4 equal columns, each a Panel whose body stacks session cards. */
+.kanban-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  min-height: 0;
+  min-width: 0;
+}
+
+.kanban-col .panel-body {
+  padding: var(--space-2);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.kanban-col .empty-state {
+  flex: 1;
+}
+
+.session-card {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: var(--r-row);
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  min-width: 0;
+}
+
+.session-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.session-title {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Session reasons are real sentences, not labels — wrap to two lines and
+   clamp at a word boundary. The Waiting column shows them in full. */
+.session-reason {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--t2);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.session-reason.full {
+  display: block;
+  overflow: visible;
+}
+
+.session-meta {
+  font-size: 11px;
+  color: var(--t3);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Archived sessions read as dead weight: hollow, dashed, muted. */
+.session-card.ended {
+  background: transparent;
+  border-style: dashed;
+}
+
+.session-card.ended .session-title {
+  color: var(--t2);
+}
+
+.session-dismiss {
+  margin-left: auto;
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--t3);
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.session-dismiss:hover {
+  background: var(--bad-soft);
+  color: var(--bad-ink);
+}
+
+/* ============================ SPEND ============================ */
+
+.spend-grid {
+  grid-template-rows: minmax(0, 55fr) minmax(0, 45fr);
+}
+
+.spend-top {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+.spend-bottom {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+.chart-fill {
+  flex: 1;
+  min-height: 0;
+  padding: 10px 6px 2px 2px;
+}
+
+/* "Assign →" link on the unassigned spend row */
+.assign-link {
+  border: none;
+  background: transparent;
+  color: var(--brand-hover);
+  font-size: 11px;
+  font-weight: 650;
+  padding: 2px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.assign-link:hover {
+  background: var(--brand-soft);
+}
+
+[data-theme="light"] .assign-link {
+  color: var(--brand);
+}
+
+/* ============================ PROJECTS ============================ */
+
+.projects-grid {
+  grid-template-columns: 320px minmax(0, 1fr);
+}
+
+.proj-search {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 7px;
+  border: 1px solid var(--line);
+  background: var(--bg2);
+  color: var(--t3);
+}
+
+.proj-search:focus-within {
+  border-color: var(--brand-border);
+}
+
+.proj-search input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--t1);
+  font-size: 11.5px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.proj-search input::placeholder {
+  color: var(--t3);
+}
+
+.proj-name {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.row.muted-row .proj-name {
+  color: var(--t3);
+}
+
+/* Detail pane */
+.pd {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pd-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.pd-name {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pd-sub {
+  font-size: 12px;
+  color: var(--t2);
+  margin-top: 2px;
+}
+
+.pd-head .open-buttons {
+  margin-left: auto;
+  flex: none;
+}
+
+.stat-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.stat-box {
+  background: var(--bg2);
+  border-radius: var(--r-row);
+  padding: 8px 10px;
+  min-width: 0;
+}
+
+.stat-k {
+  font-size: 11px;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-v {
+  margin-top: 3px;
+  font-size: 15px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--t3);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label .link {
+  margin-left: auto;
+}
+
+/* Daily-spend bar chart (project detail) */
+.day-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 110px;
+  padding-top: 6px;
+  border-bottom: 1px solid var(--line);
+}
+
+.day-bars .bar {
+  flex: 1;
+  min-width: 2px;
+  border-radius: 2px 2px 0 0;
+  background: var(--brand);
+  opacity: 0.75;
+  transition: opacity var(--dur-fast) var(--ease);
+}
+
+.day-bars .bar:hover {
+  opacity: 1;
+}
+
+.day-bars .bar.empty {
+  background: var(--bg2);
+  opacity: 1;
+  height: 2px;
+}
+
+/* ============================ LIBRARY ============================ */
+
+.library-grid {
+  grid-template-columns: 380px minmax(0, 1fr);
+}
+
+.lib-title {
+  font-size: 13px;
+  font-weight: 550;
+  color: var(--t1);
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.reader {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.reader-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.reader-title {
+  font-size: 17px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.35;
+}
+
+.reader-sub {
+  font-size: 12px;
+  color: var(--t2);
+}
+
+.reader-body {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--t1);
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: var(--bg0);
+  border: 1px solid var(--line);
+  border-radius: var(--r-row);
+  padding: var(--space-3);
+}
+
+.reader-body.mono {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* Active project filter chip in the Library header */
+.filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 26px;
+  padding: 0 6px 0 10px;
+  border-radius: var(--r-full);
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-border);
+  color: var(--t1);
+  font-size: 11.5px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.filter-chip button {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--t2);
+}
+
+.filter-chip button:hover {
+  background: var(--brand-border);
+  color: var(--t1);
+}
+
+/* ============================ SYSTEM ============================ */
+
+.system-grid {
+  grid-template-columns: 160px minmax(0, 1fr);
+}
+
+.tab-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+}
+
+.tab-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  border: none;
+  border-radius: var(--r-row);
+  background: transparent;
+  color: var(--t2);
+  font-size: 12.5px;
+  font-weight: 550;
+  text-align: left;
+  transition:
+    background var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
+}
+
+.tab-item:hover {
+  background: var(--bg2);
+  color: var(--t1);
+}
+
+.tab-item.active {
+  background: var(--brand-soft);
+  color: var(--t1);
+}
+
+/* Tab content wrappers */
+.sys-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+}
+
+.sys-fill {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+  height: 100%;
+}
+
+.sys-fill .grow {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Key-value rows (Sources / config) */
+.kv {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  padding: 4px var(--space-3);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.kv:last-child {
+  border-bottom: none;
+}
+
+.kv .k {
+  width: 130px;
+  flex: none;
+  color: var(--t3);
+}
+
+.kv .v {
+  min-width: 0;
+  color: var(--t1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Tools count strip */
+.count-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+/* Tool inventory rows */
+.tool-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+  padding: 5px var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.tool-row:last-child {
+  border-bottom: none;
+}
+
+.tool-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.tool-title {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 550;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-title .exec {
+  font-size: 11px;
+  color: var(--t3);
+}
+
+.tool-cred {
+  margin-top: 1px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tool-side {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Expiring credential rows */
+.expiry-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 34px;
+  padding: 4px var(--space-3);
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.expiry-row:last-child {
+  border-bottom: none;
+}
+
+.expiry-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+  background: var(--warn);
+}
+
+.expiry-row.expired .expiry-dot,
+.expiry-row.imminent .expiry-dot {
+  background: var(--bad);
+}
+
+.expiry-provider {
+  font-weight: 650;
+}
+
+.expiry-label {
+  flex: 1;
+  min-width: 0;
+  color: var(--t2);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.expiry-when {
+  flex: none;
+  color: var(--t3);
+  font-variant-numeric: tabular-nums;
+}
+
+.expiry-row.expired .expiry-when,
+.expiry-row.imminent .expiry-when {
+  color: var(--bad-ink);
+}
+
+/* Account quota cards */
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.account-card {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.account-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.account-label {
+  font-size: 13px;
+  font-weight: 650;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-email {
+  font-size: 11.5px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.account-head .tag {
+  margin-left: auto;
+}
+
+.account-cmd {
+  font-size: 11px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Local per-profile spend footer (from limits agents accounts). */
+.account-local {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--line);
+  font-size: 11px;
+  color: var(--t3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.limit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.limit-row-top {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.limit-row-name {
+  color: var(--t2);
+  font-weight: 550;
+}
+
+.limit-row-pct {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.limit-row-pct.ok {
+  color: var(--ok-ink);
+}
+
+.limit-row-pct.warn {
+  color: var(--warn-ink);
+}
+
+.limit-row-pct.bad {
+  color: var(--bad-ink);
+}
+
+.limit-row-reset {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--t3);
+}
+
+/* Best-account banner */
+.best-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px var(--space-3);
+  border-radius: var(--r-panel);
+  border: 1px solid var(--line);
+  background: var(--bg1);
+  font-size: 12.5px;
+}
+
+.best-banner .bb-title {
+  font-weight: 650;
+}
+
+.best-banner .bb-sub {
+  color: var(--t3);
+  font-size: 11.5px;
+}
+
+/* Preference rows */
+.set-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: 8px var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.set-item:last-child {
+  border-bottom: none;
+}
+
+.set-item .set-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.set-label {
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.set-desc {
+  margin-top: 1px;
+  font-size: 11.5px;
+  color: var(--t3);
+}
+
+/* Data tab project rows reuse .row; action cluster */
+.row-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}

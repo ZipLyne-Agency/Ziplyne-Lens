@@ -1,0 +1,11 @@
+node_modules
+dist
+coverage
+target
+.DS_Store
+.env
+.env.*
+!.env.example
+ziplyne-lens.config.json
+apps/desktop/src-tauri/binaries/ziplyne-lens-api-*
+apps/desktop/src-tauri/gen/

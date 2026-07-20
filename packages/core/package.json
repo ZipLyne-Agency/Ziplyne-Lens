@@ -1,0 +1,29 @@
+{
+  "name": "@ziplyne/core",
+  "version": "0.1.0",
+  "description": "Usage parsers and aggregation engine for ZipLyne Lens.",
+  "type": "module",
+  "license": "MIT",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./browser": {
+      "types": "./dist/browser.d.ts",
+      "import": "./dist/browser.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "fast-glob": "^3.3.3",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "vitest": "^3.2.4"
+  }
+}

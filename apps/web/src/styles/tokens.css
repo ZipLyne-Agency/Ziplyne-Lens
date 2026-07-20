@@ -1,0 +1,137 @@
+/* ============================================================
+   Lens 2.0 — design tokens
+   Dark-first. :root is the dark theme; [data-theme="light"]
+   overrides the same contract. Components never hard-code
+   colors — they read these variables.
+
+   Color = meaning:
+   - Brand violet: identity & selection ONLY.
+   - Severity hues: state ONLY (ok/warn/bad/info).
+   - Agent hues: 8px dots and small chips, never big fills.
+   ============================================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* Brand */
+  --brand: #6e5bff;
+  --brand-hover: #7d6bff;
+  --brand-soft: rgba(110, 91, 255, 0.12);
+  --brand-ink: #ede9ff; /* text on brand */
+  --brand-border: rgba(110, 91, 255, 0.38);
+
+  /* Surfaces */
+  --bg0: #0a0c11; /* app canvas */
+  --bg1: #10131a; /* panel */
+  --bg2: #171b25; /* raised / hover */
+  --overlay: rgba(4, 6, 10, 0.62);
+
+  /* Hairlines */
+  --line: rgba(255, 255, 255, 0.06);
+  --line-strong: rgba(255, 255, 255, 0.1);
+
+  /* Text */
+  --t1: #f2f4f8;
+  --t2: #a7aebd;
+  --t3: #6b7383;
+
+  /* Severity — state only */
+  --ok: #30d158;
+  --warn: #ff9f0a;
+  --bad: #ff453a;
+  --info: #64d2ff;
+  --ok-soft: rgba(48, 209, 88, 0.12);
+  --warn-soft: rgba(255, 159, 10, 0.12);
+  --bad-soft: rgba(255, 69, 58, 0.12);
+  --info-soft: rgba(100, 210, 255, 0.12);
+  /* Ink = readable text on soft fills */
+  --ok-ink: #4ee07a;
+  --warn-ink: #ffb340;
+  --bad-ink: #ff6b62;
+  --info-ink: #86ddff;
+
+  /* Agent accents — dots & chips only */
+  --agent-claude: #d97757;
+  --agent-codex: #10a37f;
+  --agent-kimi: #8b7cff;
+  --agent-grok: #5b8dc9;
+  --agent-claude-soft: rgba(217, 119, 87, 0.14);
+  --agent-codex-soft: rgba(16, 163, 127, 0.14);
+  --agent-kimi-soft: rgba(139, 124, 255, 0.16);
+  --agent-grok-soft: rgba(91, 141, 201, 0.16);
+
+  /* Spacing — 8pt grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Radii */
+  --r-panel: 10px;
+  --r-row: 8px;
+  --r-full: 999px;
+
+  /* Elevation — overlays only (palette, popovers, modals) */
+  --shadow-overlay: 0 24px 80px -16px rgba(0, 0, 0, 0.8);
+
+  /* Typography
+     Scale: 11 labels (uppercase .06em) · 12 meta · 13 base ·
+     15 row titles · 17 section titles · 20 stat · 28 hero.
+     All numbers use tabular-nums (.tnum). */
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+    system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Motion */
+  --ease: cubic-bezier(0.22, 0.68, 0.32, 1);
+  --dur-fast: 120ms;
+  --dur-med: 180ms;
+
+  /* Focus ring */
+  --ring: 0 0 0 3px var(--brand-soft), 0 0 0 1.5px var(--brand);
+}
+
+[data-theme="light"] {
+  color-scheme: light;
+
+  --brand: #6e5bff;
+  --brand-hover: #5f4df0;
+  --brand-soft: rgba(110, 91, 255, 0.1);
+  --brand-ink: #ffffff;
+  --brand-border: rgba(110, 91, 255, 0.32);
+
+  --bg0: #f5f6f8;
+  --bg1: #ffffff;
+  --bg2: #f0f1f5;
+  --overlay: rgba(15, 23, 42, 0.28);
+
+  --line: rgba(16, 24, 40, 0.08);
+  --line-strong: rgba(16, 24, 40, 0.14);
+
+  --t1: #14171d;
+  --t2: #4a5261;
+  --t3: #8a93a3;
+
+  --ok: #22b24c;
+  --warn: #e08c00;
+  --bad: #e5392e;
+  --info: #1298ce;
+  --ok-soft: rgba(34, 178, 76, 0.1);
+  --warn-soft: rgba(224, 140, 0, 0.12);
+  --bad-soft: rgba(229, 57, 46, 0.09);
+  --info-soft: rgba(18, 152, 206, 0.1);
+  --ok-ink: #167a37;
+  --warn-ink: #8f5e00;
+  --bad-ink: #c22820;
+  --info-ink: #0b6f9a;
+
+  --agent-claude: #b85c3f;
+  --agent-codex: #0b8567;
+  --agent-kimi: #6a55e8;
+  --agent-grok: #46709f;
+
+  --shadow-overlay: 0 28px 90px -20px rgba(16, 24, 40, 0.42);
+}

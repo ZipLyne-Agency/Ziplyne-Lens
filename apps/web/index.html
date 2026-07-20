@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ZipLyne Lens</title>
+    <script>
+      // Theme bootstrap: set data-theme before first paint to avoid a flash.
+      // Mirrors src/lib/theme.ts ("auto" follows prefers-color-scheme).
+      (() => {
+        var theme = "dark";
+        var choice = "auto";
+        try {
+          choice = localStorage.getItem("ziplyne-theme") || "auto";
+        } catch (_) {}
+        if (choice === "dark" || choice === "light") {
+          theme = choice;
+        } else if (window.matchMedia("(prefers-color-scheme: light)").matches) {
+          theme = "light";
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
