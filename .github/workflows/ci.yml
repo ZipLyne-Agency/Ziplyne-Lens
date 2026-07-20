@@ -65,6 +65,12 @@ jobs:
         working-directory: apps/desktop/src-tauri
         run: cargo fmt --check
 
+      - name: Prepare sidecar placeholder for Tauri validation
+        working-directory: apps/desktop/src-tauri
+        run: |
+          mkdir -p binaries
+          touch binaries/ziplyne-lens-api-aarch64-apple-darwin
+
       - name: Check native code
         working-directory: apps/desktop/src-tauri
         run: cargo check --locked
