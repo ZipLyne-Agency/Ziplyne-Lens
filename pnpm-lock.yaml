@@ -25,13 +25,13 @@ importers:
     dependencies:
       '@hono/node-server':
         specifier: ^1.19.6
-        version: 1.19.14(hono@4.12.28)
+        version: 1.19.14(hono@4.12.34)
       '@ziplyne/core':
         specifier: workspace:*
         version: link:../../packages/core
       hono:
-        specifier: ^4.10.7
-        version: 4.12.28
+        specifier: ^4.12.34
+        version: 4.12.34
       zod:
         specifier: ^4.0.5
         version: 4.4.3
@@ -987,8 +987,8 @@ packages:
     resolution: {integrity: sha512-EykJT/Q1KjTWctppgIAgfSO0tKVuZUjhgMr17kqTumMl6Afv3EISleU7qZUzoXDFTAHTDC4NOoG/ZxU3EvlMPQ==}
     engines: {node: '>=8'}
 
-  hono@4.12.28:
-    resolution: {integrity: sha512-YwUvVpSF7m1yOblFPrU3Hbo8XhPheBoiyfGuII6z19LnOr6JpDnyyp7LFNrfV56wS8tpvtBFGRISHN02pDdLOA==}
+  hono@4.12.34:
+    resolution: {integrity: sha512-GqXJqY/xJkJmuloTrnV1ZEXG3fqte+VjkUqoRNZXcrUidiUOP4fMSIHHY4tsqZBK++kVyWmt/AAfSUuy57/eSA==}
     engines: {node: '>=16.9.0'}
 
   immer@11.1.11:
@@ -1588,9 +1588,9 @@ snapshots:
   '@esbuild/win32-x64@0.28.1':
     optional: true
 
-  '@hono/node-server@1.19.14(hono@4.12.28)':
+  '@hono/node-server@1.19.14(hono@4.12.34)':
     dependencies:
-      hono: 4.12.28
+      hono: 4.12.34
 
   '@jridgewell/gen-mapping@0.3.13':
     dependencies:
@@ -2089,7 +2089,7 @@ snapshots:
 
   has-flag@4.0.0: {}
 
-  hono@4.12.28: {}
+  hono@4.12.34: {}
 
   immer@11.1.11: {}
 
