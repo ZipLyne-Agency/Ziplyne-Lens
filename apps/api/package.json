@@ -14,7 +14,7 @@
   "dependencies": {
     "@hono/node-server": "^1.19.6",
     "@ziplyne/core": "workspace:*",
-    "hono": "^4.10.7",
+    "hono": "^4.13.5",
     "zod": "^4.0.5"
   },
   "devDependencies": {
